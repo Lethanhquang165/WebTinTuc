@@ -54,7 +54,15 @@ namespace WebApplication1.Controllers
             var theloai = from tl in data.LoaiTins select tl;
             return PartialView(theloai);
         }
-        
+        public ActionResult Chitiettin(int id)
+        {
+            var ngay = from s in data.BangTins where s.BangTinID == id select s.NgayDang.ToLongDateString();
+            ViewBag.NgayDang = ngay.First();
+            var tin = from s in data.BangTins
+                      where s.BangTinID == id
+                      select s;
+            return View(tin.Single());
+        }
      
 
       }
