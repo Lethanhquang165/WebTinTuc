@@ -33,15 +33,7 @@ namespace WebApplication1.Controllers
             var tin = (from s in data.BangTins where s.LoaiTinID == id select s).OrderByDescending(a => a.BangTinID);
             return View(tin.ToPagedList(pageNum, pageSize));
         }
-        public ActionResult Chitiettin(int id)
-        {
-            var ngay = from s in data.BangTins where s.BangTinID == id select s.NgayDang.ToLongDateString();
-            ViewBag.NgayDang = ngay.First();
-            var tin = from s in data.BangTins
-                      where s.BangTinID == id
-                      select s;
-            return View(tin.Single());
-        }
+    
         public ActionResult Banner()
         {
             var qc = (from qcao in data.QuangCaos
@@ -76,14 +68,7 @@ namespace WebApplication1.Controllers
             return PartialView(theloai);
         }
         
-        public ActionResult TinLienQuan(int id)
-        {
-            var theloai = (from e in data.BangTins
-                          where e.LoaiTinID == (from tin in data.BangTins where tin.BangTinID == id select tin.LoaiTinID).First() 
-                          && e.BangTinID != (from s in data.BangTins where s.BangTinID == id select s.BangTinID).First()
-                          select e).OrderByDescending(a=>a.NgayDang).Take(4).ToList();
-            return PartialView(theloai);
-        }
+     
 
       }
 }
