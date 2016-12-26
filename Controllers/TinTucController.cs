@@ -19,21 +19,8 @@ namespace WebApplication1.Controllers
         {
             var tinmoi = Laytinmoi(10);
             return View(tinmoi);
-        }      
-        
-        public ActionResult Theloai()
-        {
-            var theloai = from tl in data.LoaiTins select tl;
-            return PartialView(theloai);
-        }
-        public ActionResult Tintheotheloai(int id, int ? page)
-        {
-            int pageSize = 20;
-            int pageNum = (page ?? 1);
-            var tin = (from s in data.BangTins where s.LoaiTinID == id select s).OrderByDescending(a => a.BangTinID);
-            return View(tin.ToPagedList(pageNum, pageSize));
-        }
-    
+        }             
+           
         public ActionResult Banner()
         {
             var qc = (from qcao in data.QuangCaos
