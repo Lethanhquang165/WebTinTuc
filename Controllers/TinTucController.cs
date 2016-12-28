@@ -68,7 +68,7 @@ namespace WebApplication1.Controllers
             var theloai = from tl in data.LoaiTins select tl;
             return PartialView(theloai);
         }
-		//quanghung 28/12
+		
 		public ActionResult Tintheotheloai(int id, int? page)
         {
             int pageSize = 20;
