@@ -63,6 +63,20 @@ namespace WebApplication1.Controllers
                       select s;
             return View(tin.Single());
         }
+		 public ActionResult Theloai()
+        {
+            var theloai = from tl in data.LoaiTins select tl;
+            return PartialView(theloai);
+        }
+		//quanghung 28/12
+		public ActionResult Tintheotheloai(int id, int? page)
+        {
+            int pageSize = 20;
+            int pageNum = (page ?? 1);
+            var tin = (from s in data.BangTins where s.LoaiTinID == id select s).OrderByDescending(a => a.BangTinID);
+            return View(tin.ToPagedList(pageNum, pageSize));
+        }
+
      
 
       }
