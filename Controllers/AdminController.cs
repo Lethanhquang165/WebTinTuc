@@ -109,3 +109,9 @@ namespace WebApplication1.Controllers
             }
             return View();
         }
+		public ActionResult Logout()
+        {
+            Session.RemoveAll();
+            Session.Abandon();
+            return RedirectToAction("Login","Admin");
+        }
