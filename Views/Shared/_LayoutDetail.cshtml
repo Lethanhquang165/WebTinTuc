@@ -37,6 +37,30 @@
 <a class="scrollToTop" href="#"><i class="fa fa-angle-up"></i></a>
 <div class="container">
 
+	<header id="header">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="header_top">
+                    <div class="header_top_left">
+                        <ul class="top_nav">
+                            <li><a href="@Url.Action("Index","TinTuc")">Trang Chủ</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="header_top_right">
+                        <p class="fa-clock-o">@DateTime.Now</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class=" header_bottom" style="background:url(http://img.cdn.ved.com.vn/web/lmht360/wp-content/themes/_gameplay/images/bg.png)">
+                    <div class="logo_area"><a href="@Url.Action("Index","TinTuc")" class="logo"><img src="http://tv.eslgaming.com/images/game/league-of-legends/logo.png" alt="" style="width:70%"></a></div>
+                    @{Html.RenderAction("Banner","TinTuc");}
+                </div>
+            </div>
+        </div>
+  </header>
+
 </div>
 
 </body>
