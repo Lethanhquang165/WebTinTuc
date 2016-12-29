@@ -115,3 +115,22 @@ namespace WebApplication1.Controllers
             Session.Abandon();
             return RedirectToAction("Login","Admin");
         }
+   public ActionResult Index(int? page)
+        {
+
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login","Admin");
+            }
+            else
+            {
+                int pageNum = (page ?? 1);
+                int pageSize = 7;
+                ViewBag.UN = Session["Username"];
+                var ad = (from tin in db.BangTins where tin.MaAdmin == (from admin in db.Admins where admin.AdminID.ToString() == Session["Username"].ToString() select admin.MaAdmin).First() 
+                          select tin).OrderByDescending(a => a.NgayDang).ToList();
+                return View(ad.ToPagedList(pageNum, pageSize));
+            }
+        }
+
+      
