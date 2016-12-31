@@ -132,5 +132,89 @@ namespace WebApplication1.Controllers
                 return View(ad.ToPagedList(pageNum, pageSize));
             }
         }
+		   public ActionResult TinTuc(int ? page, BangTin tin)
+        {
+            int pageNum = (page ?? 1);
+            int pageSize = 7;
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login","Admin");
+            }
+            else
+            {
+                ViewBag.UN = Session["Username"];
+                var ad = (from tt in db.BangTins
+                          where tt.MaAdmin == (from admin in db.Admins where admin.AdminID.ToString() == Session["Username"].ToString() select admin.MaAdmin).First()
+                          select tt).OrderByDescending(a => a.NgayDang).ToList();
+                return View(ad.ToPagedList(pageNum, pageSize));
+            }
+        }
+
+        public ActionResult Create()
+        {
+            ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin");
+            ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.AdminID), "MaAdmin", "AdminID");
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View();
+        }
+
+        [HttpPost]
+        [ValidateInput(false)]        
+        public ActionResult Create(BangTin tin, HttpPostedFileBase fileupload, FormCollection collection)
+        {
+            var ad = from admin in db.Admins where admin.AdminID.ToString() == Session["Username"].ToString() select admin.MaAdmin;
+            var td = collection["TieuDe"];
+            var mt = collection["MoTa"];
+            var nd = collection["Noidung"];
+            var ng = collection["NgayDang"];
+            ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(a => a.TenLoaiTin), "LoaiTinID", "TenLoaiTin");
+            if (fileupload == null)
+            {
+                ViewData["Loi4"] = "Vui lòng chọn hình ảnh cho bảng tin";
+            }
+            else if (String.IsNullOrEmpty(td))
+            {
+                ViewData["Loi1"] = "Tiêu đề của bảng tin là gì vậy ?";
+            }
+            else if (String.IsNullOrEmpty(mt))
+            {
+                ViewData["Loi2"] = "Viết vài dòng mô tả cho bảng tin đi";
+            }
+            else if (String.IsNullOrEmpty(nd))
+            {
+                ViewData["Loi3"] = "Nội dung của bảng tin là gì ?";
+            }
+            else if (String.IsNullOrEmpty(ng))
+            {
+                ViewData["Loi5"] = "Ngày đăng của bảng tin này là hôm nay đó";
+            }
+            else
+            {
+                if (ModelState.IsValid)
+                { 
+                    var fileName = Path.GetFileName(fileupload.FileName);
+                    var path = Path.Combine(Server.MapPath("~/HinhTin"), fileName);
+                    if (System.IO.File.Exists(path))
+                    {
+                        ViewBag.Message = "Hình ảnh đã tồn tại";
+                    }
+                    else
+                    {
+                        fileupload.SaveAs(path);
+                    }
+                    tin.MaAdmin = ad.Single();
+                    tin.AnhBiaTin = fileName;
+                    db.BangTins.InsertOnSubmit(tin);
+                    db.SubmitChanges();
+                    return RedirectToAction("TinTuc");
+                }
+            }
+            return this.Create();
+        }
+
 
       
