@@ -215,6 +215,106 @@ namespace WebApplication1.Controllers
             }
             return this.Create();
         }
+ public ActionResult Details(int id)
+        {
+            BangTin tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+            ViewBag.BangTinID = tin.BangTinID;
+            if(tin==null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
 
+        public ActionResult Edit(int id)
+        {
+            BangTin tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+            ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin", tin.LoaiTinID);
+            ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.MaAdmin), "AdminID", "AdminID", tin.MaAdmin);
+            if(tin==null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
+
+        [HttpPost, ActionName("Edit")]
+        [ValidateInput(false)]
+        public ActionResult ConfirmOnEdit(BangTin tin, int id, HttpPostedFileBase fileupload, FormCollection collection)
+        {
+            var tieude = collection["TieuDe"];
+            var ngaydang = collection["NgayDang"];
+            var mota = collection["MoTa"];
+            var noidung = collection["NoiDung"];
+            var anhbia = collection["AnhBiaTin"];
+            tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+            ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin");
+            ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.MaAdmin), "MaAdmin", "AdminID");
+            if (String.IsNullOrEmpty(tieude))
+            {
+                @ViewData["Loi1"] = "Vui lòng cho biết tiêu đề của bảng tin";
+            }
+            else if (String.IsNullOrEmpty(ngaydang))
+            {
+                @ViewData["Loi2"] = "Vui lòng cho biết ngày đăng của bảng tin";
+            }
+            else if (String.IsNullOrEmpty(noidung))
+            {
+                @ViewData["Loi3"] = "Vui lòng cho biết nội dung của bảng tin";
+            }
+            else if (String.IsNullOrEmpty(mota))
+            {
+                @ViewData["Loi4"] = "Vui lòng cho biết mô tả của bảng tin";
+            }
+            else if (fileupload == null)
+            {
+                tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+                tin.TieuDe = tieude;
+                tin.NgayDang = DateTime.Parse(ngaydang);
+                tin.MoTa = mota;
+                tin.NoiDung = noidung;
+                UpdateModel(tin);
+                db.SubmitChanges();
+                return RedirectToAction("TinTuc");
+            }
+            else
+            {
+                if (ModelState.IsValid)
+                {
+                    var fileName = Path.GetFileName(fileupload.FileName);
+                    var path = Path.Combine(Server.MapPath("~/HinhTin"), fileName);
+                    if (System.IO.File.Exists(path))
+                    {
+                        ViewBag.Message = "Hình ảnh đã tồn tại";
+                    }
+                    else
+                    {
+                        fileupload.SaveAs(path);
+                    }
+                    tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+                    tin.TieuDe = tieude;
+                    tin.NgayDang = DateTime.Parse(ngaydang);
+                    tin.MoTa = mota;
+                    tin.NoiDung = noidung;
+                    tin.AnhBiaTin = fileName;
+                    UpdateModel(tin);
+                    db.SubmitChanges();
+                    return RedirectToAction("TinTuc");
+                }
+            }
+            return this.Edit(id);
+        }
 
       
