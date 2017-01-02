@@ -316,5 +316,128 @@ namespace WebApplication1.Controllers
             }
             return this.Edit(id);
         }
+		 public ActionResult Delete(int id)
+        {
+                BangTin tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+                ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin", tin.LoaiTinID);
+                ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.MaAdmin), "AdminID", "AdminID", tin.MaAdmin);
+                if (tin == null)
+                {
+                    Response.StatusCode = 404;
+                    return null;
+                }
+                else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+                {
+                    return RedirectToAction("Login", "Admin");
+                }
+                else
+                    return View(tin);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public ActionResult ConfirmOnDelete(int id)
+        {
+            BangTin tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+            ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin", tin.LoaiTinID);
+            ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.MaAdmin), "MaAdmin", "AdminID", tin.MaAdmin);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            db.BangTins.DeleteOnSubmit(tin);
+            db.SubmitChanges();
+            return RedirectToAction("TinTuc");
+        }
+
+        public ActionResult LoaiTin (int ? page)
+        {
+            int pageNum = (page ?? 1);
+            int pageSize = 7;
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(db.LoaiTins.ToList().OrderBy(n => n.LoaiTinID).ToPagedList(pageNum, pageSize)); 
+        }
+
+        public ActionResult CreateLoaiTin()
+        {
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View();
+        }
+
+        [HttpPost, ActionName("CreateLoaiTin")]
+        public ActionResult CreateLoaiTin(LoaiTin tin)
+        {
+            db.LoaiTins.InsertOnSubmit(tin);
+            db.SubmitChanges();
+            return RedirectToAction("LoaiTin");
+        }
+
+        public ActionResult EditLoaiTin(int id)
+        {
+            LoaiTin tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
+
+        [HttpPost, ActionName("EditLoaiTin")]
+        [ValidateInput(false)]
+        public ActionResult ConfirmOnEditLoaiTin(int id, LoaiTin tin)
+        {
+            if (ModelState.IsValid)
+            {
+                tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+                UpdateModel(tin);
+                db.SubmitChanges();
+            }
+                return RedirectToAction("LoaiTin");
+        }
+
+        public ActionResult DeleteLoaiTin(int id)
+        {
+            LoaiTin tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
+
+        [HttpPost, ActionName("DeleteLoaiTin")]
+        public ActionResult ConfirmOnDeleteLoaiTin(int id)
+        {
+            LoaiTin tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            db.LoaiTins.DeleteOnSubmit(tin);
+            db.SubmitChanges();
+            return RedirectToAction("LoaiTin");
+        }
+
 
       
