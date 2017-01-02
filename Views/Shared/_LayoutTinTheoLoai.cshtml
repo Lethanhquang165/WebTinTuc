@@ -75,6 +75,20 @@
                 </div>
             </div>
         </section>
+	<section id="contentSection">
+            <div class="row">
+                @RenderBody()
+                <nav class="nav-slit">
+                    <a class="prev" href="#">
+                        <span class="icon-wrap"><i class="fa fa-angle-left"></i></span>
+                        @{Html.RenderAction("Bannerleft", "TinTuc");}
+                    </a> <a class="next" href="#">
+                        <span class="icon-wrap"><i class="fa fa-angle-right"></i></span>
+                        @{Html.RenderAction("Bannerright", "TinTuc");}
+                    </a>
+                </nav>
+            </div>
+        </section>
         <footer id="footer">
             <div class="footer_bottom">
                 <p class="copyright">Copyright &copy; 2016 <a href="@Url.Action("Index","TinTuc")">LienMinh247</a></p>
