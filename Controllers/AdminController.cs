@@ -323,6 +323,287 @@ namespace WebApplication1.Controllers
             }
             return this.Edit(id);
         }
+		 public ActionResult Delete(int id)
+        {
+                BangTin tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+                ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin", tin.LoaiTinID);
+                ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.MaAdmin), "AdminID", "AdminID", tin.MaAdmin);
+                if (tin == null)
+                {
+                    Response.StatusCode = 404;
+                    return null;
+                }
+                else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+                {
+                    return RedirectToAction("Login", "Admin");
+                }
+                else
+                    return View(tin);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public ActionResult ConfirmOnDelete(int id)
+        {
+            BangTin tin = db.BangTins.SingleOrDefault(n => n.BangTinID == id);
+            ViewBag.LoaiTinID = new SelectList(db.LoaiTins.ToList().OrderBy(n => n.TenLoaiTin), "LoaiTinID", "TenLoaiTin", tin.LoaiTinID);
+            ViewBag.AdminID = new SelectList(db.Admins.ToList().OrderBy(n => n.MaAdmin), "MaAdmin", "AdminID", tin.MaAdmin);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            db.BangTins.DeleteOnSubmit(tin);
+            db.SubmitChanges();
+            return RedirectToAction("TinTuc");
+        }
+
+        public ActionResult LoaiTin (int ? page)
+        {
+            int pageNum = (page ?? 1);
+            int pageSize = 7;
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(db.LoaiTins.ToList().OrderBy(n => n.LoaiTinID).ToPagedList(pageNum, pageSize)); 
+        }
+
+        public ActionResult CreateLoaiTin()
+        {
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View();
+        }
+
+        [HttpPost, ActionName("CreateLoaiTin")]
+        public ActionResult CreateLoaiTin(LoaiTin tin)
+        {
+            db.LoaiTins.InsertOnSubmit(tin);
+            db.SubmitChanges();
+            return RedirectToAction("LoaiTin");
+        }
+
+        public ActionResult EditLoaiTin(int id)
+        {
+            LoaiTin tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
+
+        [HttpPost, ActionName("EditLoaiTin")]
+        [ValidateInput(false)]
+        public ActionResult ConfirmOnEditLoaiTin(int id, LoaiTin tin)
+        {
+            if (ModelState.IsValid)
+            {
+                tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+                UpdateModel(tin);
+                db.SubmitChanges();
+            }
+                return RedirectToAction("LoaiTin");
+        }
+
+        public ActionResult DeleteLoaiTin(int id)
+        {
+            LoaiTin tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
+
+        [HttpPost, ActionName("DeleteLoaiTin")]
+        public ActionResult ConfirmOnDeleteLoaiTin(int id)
+        {
+            LoaiTin tin = db.LoaiTins.SingleOrDefault(n => n.LoaiTinID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            db.LoaiTins.DeleteOnSubmit(tin);
+            db.SubmitChanges();
+            return RedirectToAction("LoaiTin");
+        }
+        public ActionResult HinhAnh(int ? page)
+        {
+            int pageNum = (page ?? 1);
+            int pageSize = 7;
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(db.HinhAnhs.ToList().OrderBy(n => n.NgayDangHinh).ToPagedList(pageNum, pageSize));
+        }
+
+        public ActionResult CreateHinhAnh()
+        {
+            if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View();
+        }
+
+        [HttpPost]
+        [ValidateInput(false)]
+        public ActionResult CreateHinhAnh(HinhAnh hinh, HttpPostedFileBase fileupload, FormCollection collection)
+        {
+            var ngaydang = collection["NgayDangHinh"];
+            var tuade = collection["TuaDe"];
+            if (fileupload == null)
+            {
+                ViewData["Loi3"] = "Vui lòng chọn 1 tấm hình";
+            }
+            else if (String.IsNullOrEmpty(ngaydang))
+            {
+                ViewData["Loi1"] = "Ngày đăng hình thường là hôm nay";
+            }
+            else if (String.IsNullOrEmpty(tuade))
+            {
+                ViewData["Loi2"] = "Tựa đề của bức ảnh này là gì ?";
+            }
+
+            else
+            {
+                if (ModelState.IsValid)
+                {
+                    var fileName = Path.GetFileName(fileupload.FileName);
+                    var path = Path.Combine(Server.MapPath("~/HinhAnh"), fileName);
+                    if (System.IO.File.Exists(path))
+                    {
+                        ViewBag.Message = "Hình ảnh đã tồn tại";
+                    }
+                    else
+                    {
+                        fileupload.SaveAs(path);
+                    }
+                    hinh.UrlHinh = fileName;
+                    //hinh.TuaDe = tuade;
+                    //hinh.NgayDangHinh = DateTime.Parse(ngaydang);
+                    db.HinhAnhs.InsertOnSubmit(hinh);
+                    db.SubmitChanges();
+                    return RedirectToAction("HinhAnh");
+                }
+            }
+            return this.CreateHinhAnh();
+        }
+
+        public ActionResult EditHinhAnh(int id)
+        {
+            HinhAnh tin = db.HinhAnhs.SingleOrDefault(n => n.HinhAnhID == id);
+            if (tin == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(tin);
+        }
+
+        [HttpPost, ActionName("EditHinhAnh")]
+        [ValidateInput(false)]
+        public ActionResult ConfirmOnEditHinhAnh(int id, HinhAnh hinh, HttpPostedFileBase fileupload, FormCollection collection)
+        {
+            var ngaydang = collection["NgayDangHinh"];
+            var tuade = collection["TuaDe"];
+            if (String.IsNullOrEmpty(ngaydang))
+            {
+                @ViewData["Loi1"] = "Vui lòng chọn ngày đăng";
+            }
+            else if (String.IsNullOrEmpty(tuade))
+            {
+                @ViewData["Loi2"] = "Vui lòng nhập tựa đề của bức ảnh";
+            }
+            else if (fileupload == null)
+            {
+                hinh = db.HinhAnhs.SingleOrDefault(n => n.HinhAnhID == id);
+                hinh.TuaDe = tuade;
+                hinh.NgayDangHinh = DateTime.Parse(ngaydang);
+                UpdateModel(hinh);
+                db.SubmitChanges();
+                return RedirectToAction("HinhAnh");
+            }
+            else 
+            { 
+                if (ModelState.IsValid)
+                {
+                    var fileName = Path.GetFileName(fileupload.FileName);
+                    var path = Path.Combine(Server.MapPath("~/HinhAnh"), fileName);
+                    if (System.IO.File.Exists(path))
+                    {
+                        ViewBag.Message = "Hình ảnh đã tồn tại";
+                    }
+                    else
+                    {
+                        fileupload.SaveAs(path);
+                    }
+                    hinh = db.HinhAnhs.SingleOrDefault(n => n.HinhAnhID == id);
+                    hinh.UrlHinh = fileName;
+                    hinh.TuaDe = tuade;
+                    hinh.NgayDangHinh = DateTime.Parse(ngaydang);
+                    UpdateModel(hinh);
+                    db.SubmitChanges();
+                    return RedirectToAction("HinhAnh");
+                }
+            }
+            return this.EditHinhAnh(id);
+        }
+
+        public ActionResult DeleteHinhAnh(int id)
+        {
+            HinhAnh hinh = db.HinhAnhs.SingleOrDefault(n => n.HinhAnhID == id);
+            if (hinh == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            else if (Session["Taikhoanadmin"] == null || Session["Taikhoanadmin"].ToString() == "")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            else
+                return View(hinh);
+        }
+
+        [HttpPost, ActionName("DeleteHinhAnh")]
+        public ActionResult ConfirmOnDeleteHinhAnh(int id)
+        {
+            HinhAnh hinh = db.HinhAnhs.SingleOrDefault(n => n.HinhAnhID == id);
+            if (hinh == null)
+            {
+                Response.StatusCode = 404;
+                return null;
+            }
+            db.HinhAnhs.DeleteOnSubmit(hinh);
+            db.SubmitChanges();
+            return RedirectToAction("HinhAnh");
 
         public ActionResult Delete(int id)
         {
